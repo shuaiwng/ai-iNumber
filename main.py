@@ -116,7 +116,7 @@ if __name__ == "__main__":
 
         
     # test results
-    print("Training is done, now testing random images...")
+    print("Training is done, now testing images...")
     test_dir = "./mnist_png/testing/"
     test_struct = {}
     subdirs = [name for name in os.listdir(test_dir)]   # '0' until '9'
