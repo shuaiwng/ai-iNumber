@@ -1,4 +1,5 @@
 from PIL import Image
+from random import randrange
 import numpy as np
 import os
 import math
@@ -44,7 +45,7 @@ def forward_prop(W1, b1, W2, b2, X):
     Z1 = W1.dot(X) + b1
     A1 = ReLU(Z1)
     Z2 = W2.dot(A1) + b2
-    A2 = softmax(Z2)    
+    A2 = softmax(Z2)
     return Z1, A1, Z2, A2
 
 
@@ -56,10 +57,10 @@ def backward_prop(Z1, A1, Z2, A2, W2, X, Y):
     m = Y.shape[1]
     dZ2 = A2 - Y_train
     dW2 = 1 / m * dZ2.dot(A1.T)
-    db2 = 1 / m * np.sum(dZ2, 0)
+    db2 = 1 / m * np.sum(dZ2, 1).reshape(10,1)
     dZ1 = W2.T.dot(dZ2) * deriv_ReLU(Z1)
     dW1 = 1 / m * dZ1.dot(X.T)
-    db1 = 1 / m * np.sum(dZ1, 0)
+    db1 = 1 / m * np.sum(dZ1, 1).reshape(10,1)
     return dW1, db1, dW2, db2
 
 
@@ -96,7 +97,7 @@ def gradient_descent(X, Y, iterations, alpha):
 
 
 if __name__ == "__main__": 
-    files_num_list = get_files_num_list("./mnist_png/testing/")
+    files_num_list = get_files_num_list("./mnist_png/training/")
     lth = len(files_num_list)
 
     Y_train = np.zeros([10, lth])
@@ -111,11 +112,39 @@ if __name__ == "__main__":
         X_train[:,i] = np.array(lst).T
     X_train = np.divide(X_train, 255)
 
-    W1, b1, W2, b2 = gradient_descent(X_train, Y_train, 1000, 0.1)
-  
+    W1, b1, W2, b2 = gradient_descent(X_train, Y_train, 500, 0.1)
 
-    
+        
+    # test results
+    print("Training is done, now testing random images...")
+    test_dir = "./mnist_png/testing/"
+    test_struct = {}
+    subdirs = [name for name in os.listdir(test_dir)]   # '0' until '9'
+    len_dir = len(subdirs)
+
+    for i in range(len_dir):
+        file_list = []
+        for dirpath, dirnames, files in os.walk(test_dir+subdirs[i]):
+            for file in files:
+                file_list.append(os.path.join(dirpath, file))
+        test_struct[subdirs[i]] = file_list
 
 
+    success_numbers = 0
+    len_total = 0
+    X_test = np.zeros(28*28).reshape(28*28,1)
+    test_num = subdirs
+    for i_num in test_num:
+        len_test = len(test_struct[i_num])
+        len_total += len_test
+        for i in range(len_test):
+            lst = read_img(test_struct[i_num][i])
+            X_test[:,0] = np.array(lst).T
+            X_test = np.divide(X_test, 255)
+            Z1, A1, Z2, A2 = forward_prop(W1, b1, W2, b2, X_test)
 
-
+            match = int(i_num) == np.argmax(A2)
+            if match:
+                success_numbers += 1
+            print("Image:",test_struct[i_num][i], "AI reads:", np.argmax(A2), "Match:", match)
+    print("Success rate:", success_numbers/len_total*100, "%")
