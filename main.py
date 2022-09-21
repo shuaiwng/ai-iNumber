@@ -119,7 +119,7 @@ if __name__ == "__main__":
     print("Training is done, now testing images...")
     test_dir = "./mnist_png/testing/"
     test_struct = {}
-    subdirs = [name for name in os.listdir(test_dir)]   # '0' until '9'
+    subdirs = [name for name in os.listdir(test_dir)]   # from '0' to '9'
     len_dir = len(subdirs)
 
     for i in range(len_dir):
