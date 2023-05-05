@@ -55,7 +55,7 @@ def deriv_ReLU(Z):
 
 def backward_prop(Z1, A1, Z2, A2, W2, X, Y):
     m = Y.shape[1]
-    dZ2 = A2 - Y_train
+    dZ2 = A2 - Y
     dW2 = 1 / m * dZ2.dot(A1.T)
     db2 = 1 / m * np.sum(dZ2, 1).reshape(10,1)
     dZ1 = W2.T.dot(dZ2) * deriv_ReLU(Z1)
